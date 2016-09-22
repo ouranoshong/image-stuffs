@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="x-ua-compatible" content="ie=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>Image Stuffs</title>
+
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<img style="max-width:100vw;"
+			class="image"
+			src="http://placehold.it/2164x1440"
+			srcset="http://placehold.it/320x214 320w,
+				http://placehold.it/425x284 425w,
+				http://placehold.it/768x512 768w,
+				http://placehold.it/1440x960 1440w"
+			sizes="(max-width: 320px) 320px,(max-width: 425px) 425px,(max-width: 768px) 768px,
+				(max-width: 1440px) 1440px"
+		/>
+
+	</body>
+</html>
