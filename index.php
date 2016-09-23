@@ -4,9 +4,11 @@ use Intervention\Image\ImageManager;
 
 require 'vendor/autoload.php';
 
-function pushImage($uri)
+function pushImage($uri, $lazyLoad = false)
 {
-    header("Link: <{$uri}>; rel=preload; as=image", false);
+	if (!$lazyLoad) {
+    	header("Link: <{$uri}>; rel=preload; as=image", false);
+	}
 
     // create an image manager instance with favored driver
     $manager = new ImageManager(array('driver' => 'imagick'));
@@ -38,6 +40,11 @@ HTML;
 
 $image1 = pushImage('/1.jpg');
 $image2 = pushImage('/2.jpg');
+
+$image3 = pushImage('/1.jpg', true);
+$image4 = pushImage('/2.jpg', true);
+$image5 = pushImage('/1.jpg', true);
+$image6 = pushImage('/2.jpg', true);
 ?>
 
 <html>
@@ -101,6 +108,11 @@ $image2 = pushImage('/2.jpg');
 
 <?php echo $image1;?>
 <?php echo $image2;?>
+<?php echo $image3;?>
+<?php echo $image4;?>
+
+<?php echo $image5;?>
+<?php echo $image6;?>
 
 <script>
 	// window.onload = function() {
@@ -129,27 +141,77 @@ $image2 = pushImage('/2.jpg');
 	// };
 
 	window.onload = function() {
-		var cfs = document.querySelectorAll('.cf');
-		var imageLoad = undefined;
+		
+		var _viewport = {};
 
-		for(var i = 0; i < cfs.length; i++) {
+		_viewport.top = 0;
+		_viewport.left = 0;
 
-			imageLoad = function () {
-				var imageBottom = cfs[i].querySelector('img.bottom');
-				var imageTop = cfs[i].querySelector('img.top');
+		var scrollEvent = function() {
 
-				var img = new Image();
-				img.src = imageBottom.getAttribute('data-src');
+	    	loadImages();
 
-				img.onload = function() {
-					imageBottom.setAttribute('src', img.src);
-					imageTop.className = 'top fadeout';
 
-				}
+	    	if (document.querySelectorAll('.cf').length === document.querySelectorAll('.cf.loading').length) {
+				window.removeEventListener('scroll', scrollEvent);
 			}
 
-			imageLoad();
-		}
+	    };
+
+	    function saveViewportOffset(offset) {
+        	_viewport.bottom = (window.innerHeight || document.documentElement.clientHeight) + offset;
+        	_viewport.right = (window.innerWidth || document.documentElement.clientWidth) + offset;
+    	}
+
+		function elementInView(ele) {
+	        var rect = ele.getBoundingClientRect();
+	        return (
+	            // Intersection
+	            rect.right >= _viewport.left && rect.bottom >= _viewport.top && rect.left <= _viewport.right && rect.top <= _viewport.bottom
+	        );
+	    }
+
+	    function loadImages() {
+	    	var cfs = document.querySelectorAll('.cf');
+
+			var imageLoad = undefined;
+
+			for(var i = 0; i < cfs.length; i++) {
+
+				if (cfs[i].classList.contains('loaded') ||
+					cfs[i].classList.contains('loading') ||
+					(!elementInView(cfs[i].querySelector('img.top')))) continue;
+				
+				cfs[i].classList.add('loading');
+
+				imageLoad = function () {
+					var currentCF = cfs[i];
+					var imageBottom = currentCF.querySelector('img.bottom');
+					var imageTop = currentCF.querySelector('img.top');
+
+					var img = new Image();
+					img.src = imageBottom.getAttribute('data-src');
+
+					img.onload = function() {
+						imageBottom.setAttribute('src', img.src);
+						imageTop.classList.add('fadeout');
+						// currentCF.classList.remove('loading');
+						currentCF.classList.add('loaded');
+					}
+				}
+				
+				imageLoad();
+
+			}
+
+	    }
+
+	    saveViewportOffset(0);
+	    loadImages();
+
+	    window.addEventListener('scroll', scrollEvent,  false);
+
+
 
 		// document.querySelector('img.top').addEventListener('transitionend', function(event) {
 		// 	console.log(event.target.style.display = "none");
