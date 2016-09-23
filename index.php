@@ -96,7 +96,6 @@ $image6 = pushImage('/2.jpg', true);
 		}
 
 		.cf img.top.fadeout {
-			/*position: absolute;*/
 			opacity:0;
 		}
 
@@ -208,14 +207,7 @@ $image6 = pushImage('/2.jpg', true);
 
 	    saveViewportOffset(0);
 	    loadImages();
-
 	    window.addEventListener('scroll', scrollEvent,  false);
-
-
-
-		// document.querySelector('img.top').addEventListener('transitionend', function(event) {
-		// 	console.log(event.target.style.display = "none");
-		// }, false);
 
 	}
 </script>
